@@ -43,7 +43,7 @@ CREATE TABLE `direccion` (
 
 CREATE TABLE `paciente` (
   `ID` int(11) NOT NULL,
-  `Cedula` tinytext NOT NULL,
+  `Cedula` tinytext DEFAULT NULL,
   `Nombre` tinytext NOT NULL,
   `Apellido` tinytext NOT NULL,
   `Telefono` tinytext NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE `paciente` (
   `Signo_del_Zodiaco` tinytext NOT NULL,
   `Latitud` double DEFAULT NULL,
   `Longitud` double DEFAULT NULL,
-  `Estado` tinytext NOT NULL
+  `Estado` tinytext DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
