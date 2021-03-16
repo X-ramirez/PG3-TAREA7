@@ -1,4 +1,5 @@
 
+
 @page "/Registrar"
 
 
@@ -11,9 +12,6 @@
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Tarea7_Vacunas.Models
-{
-    
-}
 
 
 
@@ -29,183 +27,184 @@
 </div>
 @if (fallo != "")
 {
-<div class="alert alert-danger" role="alert">
-    @fallo
-</div>}
-@if (persona != null)
+    <div class="alert alert-danger" role="alert">
+        @fallo
+    </div>}
+@if (paciente != null)
 {
-<EditForm Model="persona" OnValidSubmit="vacunadoValido">
+    <EditForm Model="paciente" OnValidSubmit="vacunadoValido">
+        <DataAnnotationsValidator />
 
-    <DataAnnotationsValidator />
-
-    <div class="form-group">
-        <label for="nombre">Nombre</label>
-        <input type="text" @bind="persona.Nombre" class="form-control">
-    </div>
-    <div class="form-group">
-        <label for="apellido">Apellido</label>
-        <input type="text" @bind="persona.Apellido" class="form-control">
-    </div>
-    <div class="form-group">
-        <label for="tel">Telefono</label>
-        <input type="text" @bind="persona.Telefono" class="form-control" id="tel" placeholder="000-000-0000">
-    </div>
-    <div class="form-group">
-        <label for="nac">Fecha Nacimiento</label>
-        <input type="text" @bind="persona.FechaNacimiento" class="form-control">
-    </div>
+        <div class="form-group">
+            <label for="nombre">Nombre</label>
+            <input type="text" @bind="paciente.Nombre" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="apellido">Apellido</label>
+            <input type="text" @bind="paciente.Apellido" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="tel">Telefono</label>
+            <input type="text" @bind="paciente.Telefono" class="form-control" id="tel" placeholder="000-000-0000">
+        </div>
+        <div class="form-group">
+            <label for="nac">Fecha Nacimiento</label>
+            <input type="text" @bind="paciente.FechaNacimiento" class="form-control">
+        </div>
 
 
-    <div class="form-group">
-        <label for="vac">Vacuna</label>
-        <select class="form-control" @bind="persona.IdVacuna" id="vac" aria-label="Default select example" readonly>
-            <option selected>Vacuna Recibida</option>
-            @foreach (var vac in db.Vacunas)
-            {
-<option value="@vac.IdVacuna">@vac.NombreVacuna</option>
+        <div class="form-group">
+            <label for="vac">Vacuna</label>
+            <select class="form-control" @bind="paciente.VacunasId" id="vac" aria-label="Default select example" readonly>
+                <option selected>Vacuna Recibida</option>
+                @foreach (var vac in db.Vacunas)
+                {
+                    <option value="@vac.VacunasId">@vac.Nombre</option>
 }
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="prov">Provincia</label>
-        <select class="form-control" @bind="persona.Provincia" id="prov" aria-label="Default select example" readonly>
-            <option selected>Provincia</option>
-            @foreach (var prov in db.Provincias)
-            {
-<option value="@prov.IdProvincia">@prov.Nombre</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="prov">Provincia</label>
+            <select class="form-control" @bind="paciente.ProvinciasId" id="prov" aria-label="Default select example" readonly>
+                <option selected>Provincia</option>
+                @foreach (var prov in db.Direccion)
+                {
+                    <option value="@prov.ProvinciasId">@prov.Provincia</option>
 }
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="fecha2">Fecha Vacunacion</label>
-        <input type="date" class="form-control" id="fecha2" name="Fecha Vacuna">
-    </div>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="fecha2">Fecha Vacunacion</label>
+            <input type="date" class="form-control" id="fecha2" name="Fecha Vacuna">
+        </div>
 
-    <center><button type="Submit" class="btn btn-success" name="action">Agregar Vacunado</button></center>
-    }
+        <center><button type="Submit" class="btn btn-success" name="action">Agregar Vacunado</button></center>
+        }
 
-</EditForm>
-                @code { private string Cedula_ = "";
-                    private string ced = "";
-                    private string fallo = "";
+    </EditForm>
+    @code { private string Cedula_ = "";
+        private string ced = "";
+        private string fallo = "";
 
-                    bdrecursosvacunaContext db = new bdrecursosvacunaContext();
-                    private Personas persona = new Personas();
-                    private bool agregada = false;
-                    private bool newper = true;
-                    HttpClient http = new HttpClient();
+        registrovacunaContext db = new registrovacunaContext();
+        private Paciente paciente = new Paciente();
+        private bool agregada = false;
+        private bool newper = true;
+        HttpClient http = new HttpClient();
+        Informacion Usuario = null;
 
-                    private void CedReal()
-                    {
+        async Task CedReal()
+        {
 
-                        ced = Cedula_.Replace("-", "").Replace(" ", "");
+            ced = Cedula_.Replace("-", "").Replace(" ", "");
 
-                        if (!Vacunacion.Validacion.CedulaValida(ced))
-                        {
-                            fallo = "La cedula ingresada no es valida o no existe";
-                            return;
-                        }
+            Usuario = await http.GetFromJsonAsync<Informacion>("https://api.adamix.net/apec/cedula/" + ced);
+            if (Usuario.ok)
+            {
+            }
+            else
+            {
+                fallo = "Cedula no encontrada.";
+            }
 
-                        metCedula();
-                    }
+            metCedula();
+        }
 
-                    private void metCedula()
-                    {
-                        try
-                        {
-                            persona = db.Personas.Where(x => x.Cedula == ced).First();
-                            agregada = true;
-                            newper = false;
-                            fallo = "";
-                        }
-                        catch (InvalidOperationException ex)
-                        {
-                            GetApi();
-                        }
-                    }
+        private void metCedula()
+        {
+            try
+            {
+                paciente = db.Paciente.Where(x => x.Cedula == ced).First();
+                agregada = true;
+                newper = false;
+                fallo = "";
+            }
+            catch (InvalidOperationException ex)
+            {
+                GetApi();
+            }
+        }
 
-                    public class Informacion
-                    {
-                        public string Cedula { get; set; }
-                        public string Nombres { get; set; }
-                        public string Apellido1 { get; set; }
-                        public string Apellido2 { get; set; }
-                        public string FechaNacimiento { get; set; }
-                        public string LugarNacimiento { get; set; }
-                        public int IDCategoria { get; set; }
-                        public string IdSexo { get; set; }
-                        public string IdEstadoCivil { get; set; }
-                        public int IdOcupacion { get; set; }
-                        public int IDNacionalidad { get; set; }
-                        public int IDMunicipio { get; set; }
-                        public int IDColegio { get; set; }
-                        public object IDCausaCancelacion { get; set; }
-                        public string IDEstatus { get; set; }
-                        public object EstatusCedulaAzul { get; set; }
-                        public object CedulaAnterior { get; set; }
-                        public string mun_ced { get; set; }
-                        public string seq_ced { get; set; }
-                        public string ver_ced { get; set; }
-                        public object V2004 { get; set; }
-                        public object V2008 { get; set; }
-                        public object V2012 { get; set; }
-                        public object V2016 { get; set; }
-                        public object PLD { get; set; }
-                        public object PRD { get; set; }
-                        public object PRSC { get; set; }
-                        public object PRM { get; set; }
-                        public object Multiplicador_NombreCompleto { get; set; }
-                        public object Multiplicador_Cedula { get; set; }
-                        public object Simpatia_Descripcion { get; set; }
-                        public object Ilocalizable { get; set; }
-                        public object Apodo { get; set; }
-                        public object PadronLF { get; set; }
-                        public bool ok { get; set; }
-                        public string foto { get; set; }
+        public class Informacion
+        {
+            public string Cedula { get; set; }
+            public string Nombres { get; set; }
+            public string Apellido1 { get; set; }
+            public string Apellido2 { get; set; }
+            public string FechaNacimiento { get; set; }
+            public string LugarNacimiento { get; set; }
+            public int IDCategoria { get; set; }
+            public string IdSexo { get; set; }
+            public string IdEstadoCivil { get; set; }
+            public int IdOcupacion { get; set; }
+            public int IDNacionalidad { get; set; }
+            public int IDMunicipio { get; set; }
+            public int IDColegio { get; set; }
+            public object IDCausaCancelacion { get; set; }
+            public string IDEstatus { get; set; }
+            public object EstatusCedulaAzul { get; set; }
+            public object CedulaAnterior { get; set; }
+            public string mun_ced { get; set; }
+            public string seq_ced { get; set; }
+            public string ver_ced { get; set; }
+            public object V2004 { get; set; }
+            public object V2008 { get; set; }
+            public object V2012 { get; set; }
+            public object V2016 { get; set; }
+            public object PLD { get; set; }
+            public object PRD { get; set; }
+            public object PRSC { get; set; }
+            public object PRM { get; set; }
+            public object Multiplicador_NombreCompleto { get; set; }
+            public object Multiplicador_Cedula { get; set; }
+            public object Simpatia_Descripcion { get; set; }
+            public object Ilocalizable { get; set; }
+            public object Apodo { get; set; }
+            public object PadronLF { get; set; }
+            public bool ok { get; set; }
+            public string foto { get; set; }
 
-                    }
-
-
-                    private async void GetApi()
-                    {
-                        string api = $"https://api.adamix.net/apec/cedula/{ced}";
-                        try
-                        {
-                            Informacion info = await http.GetFromJsonAsync<Informacion>(api);
-                            Validacion(info);
-                        }
-                        catch (InvalidOperationException ex)
-                        {
-                            persona = new Personas();
-                        }
-
-                        fallo = "";
-                        StateHasChanged();
-                    }
-
-                    public void Validacion(Informacion info)
-                    {
-                        string nombre = info.Nombres;
-                        string apellido = info.Apellido1 + " " + info.Apellido2;
-                        string fechadeNacimiento = info.FechaNacimiento;
-
-                        persona = new Personas
-                        {
-                            Cedula = Cedula_,
-                            Nombre = nombre,
-                            Apellido = apellido,
-                            FechaNacimiento = Convert.ToDateTime(fechadeNacimiento),
+        }
 
 
-                        };
+        private async void GetApi()
+        {
+            string api = $"https://api.adamix.net/apec/cedula/{ced}";
+            try
+            {
+                Informacion info = await http.GetFromJsonAsync<Informacion>(api);
+                Validacion(info);
+            }
+            catch (InvalidOperationException ex)
+            {
+                paciente = new Paciente();
+            }
 
-                    }
-                    private void vacunadoValido()
-                    {
-                        if (newper)
-                        {
-                            db.Add(persona);
-                        }
+            fallo = "";
+            StateHasChanged();
+        }
 
-                        db.SaveChanges();
-                    } }}
+        public void Validacion(Informacion info)
+        {
+            string nombre = info.Nombres;
+            string apellido = info.Apellido1 + " " + info.Apellido2;
+            string fechadeNacimiento = info.FechaNacimiento;
+
+            paciente = new Paciente
+            {
+                Cedula = Cedula_,
+                Nombre = nombre,
+                Apellido = apellido,
+                FechaNacimiento = fechadeNacimiento,
+            };
+
+        }
+        private void vacunadoValido()
+        {
+            if (newper)
+            {
+                db.Add(paciente);
+            }
+
+            db.SaveChanges();
+        } }}
